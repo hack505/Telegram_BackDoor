@@ -163,7 +163,7 @@ def download_file(update, context):
 def press_key(update, context):
     try:
         # Extract the key combination after the /presskey command
-        key_combination = update.message.text[len('/presskey'):].strip()
+        key_combination = update.message.text[len('/press'):].strip()
         if key_combination:
             pyautogui.hotkey(*key_combination.split())
         else:
@@ -176,7 +176,7 @@ def press_key(update, context):
 def arrow_key(update, context):
     try:
         # Extract the arrow key command
-        arrow_command = update.message.text[len('/arrow '):].strip()
+        arrow_command = update.message.text[len('/arrow '):]
 
         # Map arrow commands to corresponding keys
         arrow_keys = {
@@ -226,9 +226,9 @@ disp.add_handler(telegram.ext.CommandHandler('jarvis', run_command))
 disp.add_handler(telegram.ext.MessageHandler(
     telegram.ext.Filters.document, download_file))
 disp.add_handler(telegram.ext.CommandHandler("yo", yo))
-disp.add_handler(telegram.ext.CommandHandler("presskey", press_key))
+disp.add_handler(telegram.ext.CommandHandler("press", press_key))
 disp.add_handler(telegram.ext.MessageHandler(
-    telegram.ext.Filters.regex(r'^/arrow\s'), arrow_key))
+    telegram.ext.Filters.regex("arrow"), arrow_key))
 # disp.add_handler(telegram.ext.CommandHandler("sys", system_info_on_request))
 disp.add_handler(CommandHandler("download", download_requested_file))
 disp.add_handler(CommandHandler("cd", cd))
