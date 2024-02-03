@@ -1,3 +1,4 @@
+from turtle import up
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from telegram import Update
 import telegram.ext
@@ -9,6 +10,8 @@ import json
 import logging
 import os
 import socket
+import pynput
+import time
 
 # Set up logging
 file_name = "app.log"
@@ -178,6 +181,29 @@ def run_command(update, context):
         logging.error(f"Error executing command:\n{e}")
 
 
+def blocker(update, context):
+    # Get the required blocking time for user's message
+    timing = float(update.message.text.split('/blocker ')[1])
+    # print(f"blocking keyboard and mouse of {timing} minutes")
+
+    try:
+        # Disable mouse and keyboard events
+        mouse_listener = pynput.mouse.Listener(suppress=True)
+        mouse_listener.start()
+        keyboard_listener = pynput.keyboard.Listener(suppress=True)
+        keyboard_listener.start()
+
+        # sleep time for user to block
+        time.sleep(timing * 60)
+
+        # Enable mouse and keyboard events
+        mouse_listener.stop()
+        keyboard_listener.stop()
+        update.message.reply_text(f"sucessful blocked for {timing} mintues")
+    except Exception as e:
+        update.message.reply_text(f"Error while blocking: \n{e}")
+
+
 def download_file(update, context):
     try:
         # Get the file ID from the message
@@ -292,8 +318,6 @@ disp.add_handler(telegram.ext.CommandHandler("help", help))
 disp.add_handler(telegram.ext.CommandHandler("content", content))
 # Add the new command handler
 disp.add_handler(telegram.ext.CommandHandler("screen", screenshot))
-disp.add_handler(telegram.ext.MessageHandler(
-    telegram.ext.Filters.text, handle_text))
 disp.add_handler(telegram.ext.CommandHandler('jarvis', run_command))
 disp.add_handler(telegram.ext.MessageHandler(
     telegram.ext.Filters.document, download_file))
@@ -306,6 +330,10 @@ disp.add_handler(telegram.ext.MessageHandler(
 disp.add_handler(CommandHandler("download", download_requested_file))
 disp.add_handler(CommandHandler("cd", cd))
 disp.add_handler(CommandHandler("ls", ls))
+disp.add_handler(CommandHandler("blocker", blocker))
+
+disp.add_handler(telegram.ext.MessageHandler(
+    telegram.ext.Filters.text, handle_text))  # biggest problem was due to this line  which was initially placed inline 319 therefore the handers after this were not working
 
 updater.job_queue.run_once(system_info, 0)
 
