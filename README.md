@@ -47,13 +47,11 @@ This repository contains code for a Telegram bot that offers a range of advanced
 - [ ] audio logger
 - [x] mouse coordinates
 - [ ] mouse control
-<<<<<<< HEAD
 - [x] Keyboard locker
 - [x] mouse lock
-=======
 - [ ] Keyboard locker
 - [ ] mouse lock
->>>>>>> eeed7a97a2d1bb029eda74f1c6423ad4817b8b04
+
 ## CAUTION
 
 As you might had seen the file included my token of bot and my chat_id also 

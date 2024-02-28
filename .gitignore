@@ -4,3 +4,9 @@ kamesh/
 Keylogger
 WORKSPACE/
 storage/
+__pycache__/
+.idea/
+.vscode
+.ipynb_checkpoints
+config.json
+app.log
