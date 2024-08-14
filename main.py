@@ -1,3 +1,5 @@
+import requests
+import threading
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from telegram import Update
 import telegram.ext
@@ -14,14 +16,14 @@ import time
 
 
 # Set up logging
-file_name = "app.log"
-logging.basicConfig(filename=file_name, level=logging.DEBUG,
+LogInFiles = True
+
+logging.basicConfig(filename="app.log" if LogInFiles else None, level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
-logging.info('-'*500)
+logging.info('-'*500) if LogInFiles else None
 
 # inilazation
-Token = ""
-ChatId = ""
+Token, ChatId = "", ""
 
 try:
     with open("config.json", 'r') as config_file:
@@ -61,15 +63,18 @@ def ls(update, context):
 def system_info(context):
     try:
         hostname = socket.gethostname()
-        ip = socket.gethostbyname(hostname)
+        private_ip = socket.gethostbyname(hostname)
         plat = platform.processor()
         system = platform.system()
         machine = platform.machine()
+        response = requests.get('https://api.ipify.org?format=json')
+        public_ip = response.json()['ip']
 
         SysInfo_str = (
             f"System Information:\n\n"
             f"Hostname: {hostname}\n"
-            f"IP Address: {ip}\n"
+            f"Private IP Address: {private_ip}\n"
+            f"Public IP Address: {public_ip}\n"
             f"Processor: {plat}\n"
             f"System: {system}\n"
             f"Machine: {machine}")
@@ -130,10 +135,19 @@ def content(update, context):
 
 def screenshot(update, context):
     try:
+        if update.message.text > len("/screen "):
+            afterTime = update.message.text(len("/screen "))
+            if type(afterTime) == type(int):  # In seconds
+                time.sleep(afterTime)
+            else:
+                pass
         image_path = take_screenshot()
         update.message.reply_photo(photo=open(image_path, 'rb'))
     except Exception as e:
         update.message.reply_text(f"Error: {e}")
+        # os.remove(image_path)
+        # subprocess.run(['rm', image_path])
+        # print("deleted image", image_path)
         logging.error(e)
 
 
@@ -144,6 +158,7 @@ def admin(update, context):
 
 
 def handle_text(update, context):
+    pyautogui.FAILSAFE = False
     try:
         user_text = update.message.text
 
@@ -170,16 +185,21 @@ def handle_text(update, context):
 
 def run_command(update, context):
     # Get the command from the user's message
+    def excute_command(command):
+        try:
+            # Execute the command using subprocess
+            result = subprocess.check_output(command, shell=True, text=True)
+            update.message.reply_text(
+                f"The Command '{command}' executed successfully:\n{result}")
+            logging.debug(f"command: {command}")
+        except subprocess.CalledProcessError as e:
+            update.message.reply_text(f"Error executing command:\n{e}")
+            logging.error(f"Error executing command:\n{e}")
+
     command = update.message.text[len('/jarvis '):]
 
-    try:
-        # Execute the command using subprocess
-        result = subprocess.check_output(command, shell=True, text=True)
-        update.message.reply_text(f"Command executed successfully:\n{result}")
-        logging.debug(f"command: {command}")
-    except subprocess.CalledProcessError as e:
-        update.message.reply_text(f"Error executing command:\n{e}")
-        logging.error(f"Error executing command:\n{e}")
+    thread = threading.Thread(target=excute_command, args=(command,))
+    thread.start()
 
 
 def blocker(update, context):
@@ -205,7 +225,7 @@ def blocker(update, context):
         update.message.reply_text(f"Error while blocking: \n{e}")
 
 
-def download_file(update, context):
+def download_file_unpluged(update, context):
     try:
         # Get the file ID from the message
         file_id = update.message.document.file_id
@@ -226,6 +246,32 @@ def download_file(update, context):
 
     except Exception as e:
         logging.error(e)
+
+
+def download_file(update, context):
+    try:
+        # Get the file ID from the message
+        file_id = update.message.document.file_id
+
+        # Get information about the file using its ID
+        file_info = context.bot.get_file(file_id)
+
+        # Extract original filename
+        original_file_name = file_info.file_path.split('/')[-1]
+
+        # Download the file with the original filename
+        downloaded_file = file_info.download(custom_path=original_file_name)
+
+        # Reply to the user with the download path and file name
+        update.message.reply_text(
+            f"File '{original_file_name}' downloaded successfully.")
+        logging.debug(
+            f"File '{original_file_name}' downloaded successfully.")
+
+    except Exception as e:
+        error_message = f"Error occurred while downloading file: {e}"
+        update.message.reply_text(error_message)
+        logging.error(error_message, exc_info=True)
 
 
 def press_key(update, context):
@@ -307,8 +353,19 @@ def edit_message(update, context):
     except Exception as e:
         update.message.reply_text(f"Error: {e}")
 
-# Main handlers
 
+def disturb(update, context):
+    try:
+        argument = update.message.text[len("/disturb "):]
+        if argument:
+            arguments = argument.split()
+            update.message.reply_text(arguments)
+
+    except Exception as e:
+        update.message.reply_text(f"Error: {e}")
+
+
+# Main handlers
 
 updater = telegram.ext.Updater(Token, use_context=True)
 
@@ -323,7 +380,6 @@ disp.add_handler(telegram.ext.CommandHandler('jarvis', run_command))
 disp.add_handler(telegram.ext.MessageHandler(
     telegram.ext.Filters.document, download_file))
 disp.add_handler(telegram.ext.CommandHandler('yo', yo))
-# disp.add_handler(telegram.ext.CommandHandler('yo', yo))
 disp.add_handler(telegram.ext.CommandHandler('press', press_key))
 disp.add_handler(telegram.ext.MessageHandler(
     telegram.ext.Filters.regex("arrow"), arrow_key))
@@ -332,9 +388,10 @@ disp.add_handler(CommandHandler("download", download_requested_file))
 disp.add_handler(CommandHandler("cd", cd))
 disp.add_handler(CommandHandler("ls", ls))
 disp.add_handler(CommandHandler("blocker", blocker))
+disp.add_handler(CommandHandler("disturb", disturb))
 
 disp.add_handler(telegram.ext.MessageHandler(
-    telegram.ext.Filters.text, handle_text))  # biggest problem was due to this line  which was initially placed inline 319 therefore the handers after this were not working
+    telegram.ext.Filters.text, handle_text))
 
 updater.job_queue.run_once(system_info, 0)
 
